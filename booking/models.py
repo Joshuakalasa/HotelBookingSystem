@@ -53,14 +53,6 @@ class Room(models.Model):
         elif self.room_type == "FAMILY":
             self.price = 7000
             
-            
-        if not self.pk:
-            existing_numbers = set(Room.objects.values_list('id', flat=True))
-            while True:
-                if self.id == 0:
-                    self.id = random.randint(1, 100)
-                if self.id not in existing_numbers:
-                    break
         super(Room, self).save(*args, **kwargs)
     
     def __str__(self):
@@ -84,11 +76,32 @@ class Reservation(models.Model):
         return "{} {}".format(self.room, self.details)
 
 class Service(models.Model):
+    name = models.CharField(max_length=255, blank=False, null=True)
     mini_bar = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
     room_service = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
     
     def __str__(self):
-        return "{}|{}".format(self.mini_bar, self.room_service)
+        return "{}".format(self.name)
+
+
+class Customer(models.Model):
+    name = models.CharField(max_length=255, blank=False, null=False)
+    address = models.CharField(max_length=255, blank=False, null=True)
+    email = models.EmailField(blank=True, null=False)
+    phone_number = PhoneNumberField(null=False, blank=True, unique=True)
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, blank=False, null=True)
+    def __str__(self):
+        return "{}".format(self.name)
+    
+class Guest(models.Model):
+    name = models.CharField(max_length=255, blank=False, null=False)
+    address = models.CharField(max_length=255, blank=False, null=True)
+    email = models.EmailField(blank=True, null=False)
+    phone_number = PhoneNumberField(null=False, blank=True, unique=True) 
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True, blank=False)
+
+    def __str__(self):
+        return "{}".format(self.name)
 
 class Invoice(models.Model):
     id = models.CharField(
@@ -100,34 +113,28 @@ class Invoice(models.Model):
         default=uuid.uuid1
     )
     
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
+    guest = models.ForeignKey(Guest, on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateTimeField(blank=False, null=True)
+    # Return name of Client
+    name = models.CharField(max_length=255, blank=True, null=True)
+    
     mini_bar = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
-    room_service = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    room_service = models.CharField(max_length=255, blank=True, null=True)
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True, blank=False)
     services = models.ForeignKey(Service, on_delete=models.CASCADE, null=True, blank=False)
     
     def save(self, *args, **kwargs):
-        self.services.mini_bar = self.mini_bar
-        self.services.room_service = self.room_service
+        self.mini_bar = self.services.mini_bar
+        self.room_service = self.services.room_service
+        
+        if self.customer:
+            self.name = self.customer.name
+        elif self.guest:
+            self.name = self.guest.name
+            
         super(Invoice, self).save(*args, **kwargs)
     
     
     def __str__(self):
         return "invoice: {}  ||  {}".format(self.id, self.date)
-class Customer(models.Model):
-    name = models.CharField(max_length=255, blank=False, null=False)
-    address = models.CharField(max_length=255, blank=False, null=True)
-    email = models.EmailField(blank=True, null=False)
-    phone_number = PhoneNumberField(null=False, blank=True, unique=True)
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, blank=False, null=True)
-    def __str__(self):
-        return "{} {}".format(self.name, self.reservation)
-    
-class Guest(models.Model):
-    name = models.CharField(max_length=255, blank=False, null=False)
-    address = models.CharField(max_length=255, blank=False, null=True)
-    email = models.EmailField(blank=True, null=False)
-    phone_number = PhoneNumberField(null=False, blank=True, unique=True) 
-
-    def __str__(self):
-        return "{}{}".format(self.name, self.address)
