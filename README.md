@@ -106,11 +106,7 @@ Let's get started 🥸.
    ```sh
    pip install -r requirements.txt
    ```
-    It's That simple
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
+	It's That simple.
 
 <!-- CONTRIBUTING -->
 ## Contributing
