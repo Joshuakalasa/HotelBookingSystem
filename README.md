@@ -106,7 +106,15 @@ Let's get started 🥸.
    ```sh
    pip install -r requirements.txt
    ```
-	It's That simple.
+3. Add the app migrations
+   ```sh
+   python manage.py migrate
+   ```
+4. Run Server
+   ```sh
+   python manage.py runserver
+   ```
+	It's That simple. 😮‍💨
 
 <!-- CONTRIBUTING -->
 ## Contributing
