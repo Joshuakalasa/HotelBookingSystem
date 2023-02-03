@@ -73,7 +73,7 @@ class Reservation(models.Model):
     details = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return "{} {}".format(self.room, self.details)
+        return "{}".format(self.room)
 
 class Service(models.Model):
     name = models.CharField(max_length=255, blank=False, null=True)
